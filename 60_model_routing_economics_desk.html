@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>60 · Model-Routing Economics Desk — IE Edge Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0e16; --surface:#121826; --surface2:#1a2234; --border:rgba(148,163,184,.14);
+    --text:#e6ebf4; --muted:#94a3b8; --accent:#38bdf8; --accent-soft:rgba(56,189,248,.12);
+    --amber:#fbbf24; --green:#34d399; --violet:#a78bfa; --rose:#fb7185; --lime:#a3e635;
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+    background:
+      radial-gradient(1100px 700px at 85% -10%, rgba(56,189,248,.09), transparent 60%),
+      radial-gradient(900px 600px at -10% 110%, rgba(56,189,248,.05), transparent 60%),
+      var(--bg);
+    color:var(--text); min-height:100vh; padding-bottom:130px;
+  }
+  .wrap{max-width:1120px;margin:0 auto;padding:32px 24px}
+  .topnav{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px}
+  .topnav a{color:var(--muted);text-decoration:none;font-size:13px;font-weight:600}
+  .topnav a:hover{color:var(--accent)}
+  .eyebrow{font-size:11px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--accent)}
+  header h1{font-size:clamp(26px,4.2vw,40px);font-weight:800;letter-spacing:-.02em;margin:6px 0 8px}
+  header h1 .num{color:var(--accent);font-family:var(--mono)}
+  .tagline{color:var(--muted);font-size:15px;max-width:720px;line-height:1.55}
+  .meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+  .chip{font-size:11.5px;font-weight:600;color:var(--muted);background:var(--surface);border:1px solid var(--border);padding:5px 11px;border-radius:99px}
+  .chip b{color:var(--text)}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-top:22px}
+  .card h2{font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+  .hint{font-size:12.5px;color:var(--muted)}
+  /* model profiles */
+  .profiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+  .prof{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:12px 14px;font-size:11.5px;color:var(--muted);line-height:1.6}
+  .prof b{display:block;font-size:13px;color:var(--text);margin-bottom:3px}
+  .prof .mono{font-family:var(--mono)}
+  /* rules */
+  .rules{display:flex;flex-direction:column;gap:8px}
+  .rule{display:flex;align-items:center;gap:12px;background:var(--surface2);border:1px solid var(--border);
+    border-radius:12px;padding:10px 14px;flex-wrap:wrap}
+  .rule .seg{flex:1;min-width:210px}
+  .rule .seg .nm{font-size:13px;font-weight:700}
+  .rule .seg .sub{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .rule .seg .sub b{font-family:var(--mono);color:var(--text)}
+  .diff{display:inline-flex;gap:2px;margin-left:6px;vertical-align:middle}
+  .diff i{width:7px;height:11px;border-radius:2px;background:#2a3550}
+  .diff i.on{background:var(--accent)}
+  .rbtns{display:flex;gap:5px;flex-wrap:wrap}
+  .rbtns button{font-family:'Inter';font-size:11px;font-weight:700;padding:8px 11px;border-radius:8px;cursor:pointer;
+    background:transparent;color:var(--muted);border:1px solid var(--border);transition:.15s;white-space:nowrap}
+  .rbtns button:hover{color:var(--text)}
+  .rbtns button.on[data-r="nano"]{background:rgba(163,230,53,.14);border-color:var(--lime);color:var(--lime)}
+  .rbtns button.on[data-r="mid"]{background:rgba(56,189,248,.14);border-color:var(--accent);color:var(--accent)}
+  .rbtns button.on[data-r="frontier"]{background:rgba(167,139,250,.14);border-color:var(--violet);color:var(--violet)}
+  .rbtns button.on[data-r="human"]{background:rgba(251,191,36,.14);border-color:var(--amber);color:var(--amber)}
+  /* run area */
+  .runbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+  .abtn{font-family:'Inter';font-size:13.5px;font-weight:700;border:none;border-radius:10px;padding:11px 18px;cursor:pointer;transition:.15s}
+  .abtn.primary{background:var(--accent);color:#052435}
+  .abtn.primary:hover{filter:brightness(1.1)}
+  .abtn.primary:disabled{opacity:.4;cursor:default}
+  .abtn.ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
+  .abtn.ghost:hover{color:var(--text)}
+  .abtn.ghost:disabled{opacity:.4;cursor:default}
+  .mixtag{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--accent);border:1px solid rgba(56,189,248,.4);
+    border-radius:99px;padding:5px 11px}
+  .lanes{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  @media(max-width:820px){.lanes{grid-template-columns:repeat(2,1fr)}}
+  .lane{background:#0d1320;border:1px solid var(--border);border-radius:12px;padding:11px;min-height:150px}
+  .lane .lh{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;display:flex;justify-content:space-between}
+  .lane .lh .cost{font-family:var(--mono);color:var(--muted);font-weight:600;text-transform:none;letter-spacing:0}
+  .lane[data-r="nano"] .lh{color:var(--lime)} .lane[data-r="mid"] .lh{color:var(--accent)}
+  .lane[data-r="frontier"] .lh{color:var(--violet)} .lane[data-r="human"] .lh{color:var(--amber)}
+  .req{display:flex;align-items:center;gap:6px;font-size:10.5px;background:var(--surface2);border:1px solid var(--border);
+    border-radius:7px;padding:5px 8px;margin-bottom:5px;animation:slideIn .35s ease both}
+  @keyframes slideIn{from{opacity:0;transform:translateY(-7px)}to{opacity:1;transform:none}}
+  .req .nm{flex:1;color:var(--text);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .req .c{font-family:var(--mono);color:var(--muted)}
+  .req.fail{border-color:rgba(251,113,133,.5);background:rgba(251,113,133,.08)}
+  .req.over{border-color:rgba(251,191,36,.45)}
+  .totals{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:14px}
+  .tot{background:var(--surface2);border:1px solid var(--border);border-radius:11px;padding:12px;text-align:center}
+  .tot .v{font-family:var(--mono);font-size:21px;font-weight:800;color:var(--text)}
+  .tot .v.blue{color:var(--accent)} .tot .v.bad{color:var(--rose)} .tot .v.warn{color:var(--amber)}
+  .tot .l{font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:3px}
+  .runlog{background:#0d1320;border:1px solid var(--border);border-radius:12px;padding:12px;margin-top:12px;
+    font-family:var(--mono);font-size:11px;line-height:1.7;max-height:150px;overflow-y:auto;color:var(--muted);display:none}
+  .runlog .ok{color:#6ee7b7}.runlog .er{color:var(--rose)}.runlog .wa{color:var(--amber)}
+  /* scoreboard */
+  .board{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+  .bcol{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:15px}
+  .bcol.you{border-color:rgba(56,189,248,.5)}
+  .bcol .bh{font-size:12px;font-weight:800;margin-bottom:10px}
+  .bcol .row{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin-top:6px}
+  .bcol .row b{font-family:var(--mono);color:var(--text)}
+  .bcol .row b.bad{color:var(--rose)} .bcol .row b.good{color:var(--green)}
+  .bcol .qtrack{height:8px;background:#0d1320;border-radius:99px;overflow:hidden;margin-top:8px}
+  .bcol .qfill{height:100%;border-radius:99px;transition:width .8s cubic-bezier(.22,1,.36,1);width:0%}
+  /* reveal */
+  .reveal-panel{display:none;margin-top:16px;background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.3);
+    border-radius:12px;padding:18px;font-size:13px;line-height:1.65}
+  .reveal-panel.show{display:block}
+  .reveal-panel b{color:var(--amber)}
+  .reveal-panel table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12px}
+  .reveal-panel th{text-align:left;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:5px 8px}
+  .reveal-panel td{padding:6px 8px;border-top:1px solid var(--border)}
+  .reveal-panel td.mono{font-family:var(--mono)}
+  /* instructor */
+  .instructor{position:fixed;left:0;right:0;bottom:0;background:rgba(16,20,30,.92);backdrop-filter:blur(12px);
+    border-top:1px solid rgba(251,191,36,.35);z-index:10}
+  .instructor .inner{max-width:1120px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .instructor .tag{font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--amber);
+    border:1px solid rgba(251,191,36,.4);padding:4px 9px;border-radius:6px}
+  .ibtn{font-family:'Inter';font-size:12.5px;font-weight:700;border:none;border-radius:9px;padding:9px 15px;cursor:pointer}
+  .ibtn.primary{background:var(--amber);color:#3b2b00}
+  .ibtn.ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
+  .ibtn.ghost:hover{color:var(--text)}
+  .ibtn.ghost:disabled{opacity:.4;cursor:default}
+  .debrief{display:none;max-width:1120px;margin:0 auto;padding:0 24px 14px;color:var(--muted);font-size:13px;line-height:1.6}
+  .debrief.show{display:block}
+  .debrief b{color:var(--amber)}
+  .footer-note{margin-top:26px;font-size:12px;color:#5b6478;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="topnav">
+    <a href="index.html">← Exercise Library</a>
+    <a href="index.html" style="font-family:var(--mono)">IE EDGE LAB · AI-NATIVE WORK</a>
+  </nav>
+
+  <header>
+    <div class="eyebrow">Economics, ROI &amp; measurement</div>
+    <h1><span class="num">60</span> Model-Routing Economics Desk</h1>
+    <p class="tagline">You run the routing desk. A batch of requests is inbound — FAQ lookups next to contract clauses. Write routing rules across four tiers, run the stream, and watch every misroute cost you: frontier on FAQs burns money, nano on nuance burns quality. Beat the all-frontier and all-nano baselines.</p>
+    <div class="meta">
+      <span class="chip">Format · <b>Mini simulation</b></span>
+      <span class="chip">Band · <b>Live exercise</b></span>
+      <span class="chip">Duration · <b>10–15 min</b></span>
+      <span class="chip">Concepts · <b>model routing · task segmentation · cost · quality · latency</b></span>
+    </div>
+  </header>
+
+  <div class="card">
+    <h2>1 · Your model portfolio</h2>
+    <div class="profiles">
+      <div class="prof"><b>🐜 Nano</b><span class="mono">€0.01/req · 0.3s</span><br>Capability ▮ — lookups, formatting, templated text.</div>
+      <div class="prof"><b>⚙️ Mid</b><span class="mono">€0.08/req · 0.9s</span><br>Capability ▮▮ — solid drafting, routine reasoning.</div>
+      <div class="prof"><b>🧠 Frontier</b><span class="mono">€0.60/req · 3.5s</span><br>Capability ▮▮▮ — nuance, ambiguity, long documents.</div>
+      <div class="prof"><b>🧑 Human expert</b><span class="mono">€9.00/req · ~4h</span><br>Capability ▮▮▮▮ — judgment, accountability, sign-off.</div>
+    </div>
+    <p class="hint" style="margin-top:10px">⚠️ A failed request doesn't just fail — it comes back as <b style="color:var(--rose)">rework at human cost (+€9.00)</b>.</p>
+  </div>
+
+  <div class="card">
+    <h2>2 · Rule builder — route each segment</h2>
+    <div class="rules" id="rules"></div>
+  </div>
+
+  <div class="card">
+    <h2>3 · Run the stream</h2>
+    <div class="runbar">
+      <button class="abtn primary" id="btnRun" disabled>▶ Run the batch</button>
+      <button class="abtn ghost" id="btnShift" disabled>🔀 Shift the mix — contract-heavy quarter</button>
+      <span class="mixtag" id="mixTag">MIX A · normal week · 17 requests</span>
+      <span class="hint" id="runStatus">Route all six segments to unlock the run.</span>
+    </div>
+    <div class="lanes" id="lanes"></div>
+    <div class="totals" id="totals"></div>
+    <div class="runlog" id="runlog"></div>
+  </div>
+
+  <div class="card">
+    <h2>4 · Scoreboard — you vs. the naive baselines</h2>
+    <p class="hint" style="margin-bottom:12px">Same workload, three policies. Cost includes rework. Quality = requests handled correctly first time.</p>
+    <div class="board" id="board"></div>
+    <div class="reveal-panel" id="revealPanel">
+      <b>The routing rule:</b> for every segment, route to the <b>cheapest model that clears the quality bar</b> — and put a human in the loop where failure is unaffordable, not where work is merely hard.
+      <table>
+        <thead><tr><th>Segment</th><th>Bar</th><th>Cheapest that clears it</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr><td>📚 FAQ lookup</td><td class="mono">▮</td><td>🐜 Nano</td><td>Frontier here = pure money burn</td></tr>
+          <tr><td>🧹 Bulk formatting</td><td class="mono">▮</td><td>🐜 Nano</td><td>Deterministic-ish, low stakes</td></tr>
+          <tr><td>✉️ Routine email</td><td class="mono">▮▮</td><td>⚙️ Mid</td><td>Nano's drafts create silent rework</td></tr>
+          <tr><td>😤 Nuanced complaint</td><td class="mono">▮▮▮</td><td>🧠 Frontier</td><td>Empathy + ambiguity; failures churn customers</td></tr>
+          <tr><td>📜 Contract clause</td><td class="mono">▮▮▮</td><td>🧠 Frontier</td><td>Cheap misreads cost more than the model saves</td></tr>
+          <tr><td>🏛️ Regulated advice</td><td class="mono">▮▮▮▮</td><td>🧑 Human</td><td>Accountability can't be routed to silicon</td></tr>
+        </tbody>
+      </table>
+      <div style="margin-top:10px"><b>Misroute asymmetry:</b> overkill wastes <em>cents</em>; underkill costs <em>euros</em> of rework plus trust. And when the mix shifted, static rules kept working only because they were written per-segment — routing is a living policy, re-tuned as the workload drifts.</div>
+    </div>
+  </div>
+
+  <p class="footer-note">Proof of concept · seeded, client-side · IE Edge Lab teaching companion</p>
+</div>
+
+<div class="instructor">
+  <div class="inner">
+    <span class="tag">Instructor</span>
+    <button class="ibtn primary" id="btnReveal">📉 Reveal the routing rule</button>
+    <button class="ibtn ghost" id="btnReset">↺ Reset</button>
+    <button class="ibtn ghost" id="btnDebrief">💬 Debrief prompts</button>
+    <span style="flex:1"></span>
+    <span style="font-size:11.5px;color:var(--muted)">Choreography: set rules → run → compare baselines → shift the mix → re-run → reveal</span>
+  </div>
+  <div class="debrief" id="debrief">
+    <b>Debrief:</b> Which signal best predicted difficulty? · What was the cost of a false cheap-route decision? · When should a person enter the route?
+  </div>
+</div>
+
+<script>
+(function(){
+  const ROUTES={
+    nano:{name:'🐜 Nano',cap:1,cost:0.01,lat:0.3},
+    mid:{name:'⚙️ Mid',cap:2,cost:0.08,lat:0.9},
+    frontier:{name:'🧠 Frontier',cap:3,cost:0.60,lat:3.5},
+    human:{name:'🧑 Human',cap:4,cost:9.00,lat:240}
+  };
+  const REWORK=9.00;
+  const SEGMENTS=[
+    {key:'faq',      name:'📚 FAQ lookup',            sub:'“What are your opening hours?”',        req:1, stakes:'low'},
+    {key:'fmt',      name:'🧹 Bulk formatting',       sub:'normalize 40 supplier records',          req:1, stakes:'low'},
+    {key:'mail',     name:'✉️ Routine email drafting', sub:'meeting follow-ups, confirmations',     req:2, stakes:'medium'},
+    {key:'complaint',name:'😤 Nuanced complaint',      sub:'“Third failed delivery. I\'m done.”',   req:3, stakes:'high'},
+    {key:'contract', name:'📜 Contract clause analysis',sub:'liability caps in a 60-page MSA',      req:3, stakes:'high'},
+    {key:'reg',      name:'🏛️ Regulated advice',       sub:'pension transfer recommendation',      req:4, stakes:'critical'}
+  ];
+  const MIXES={
+    A:{tag:'MIX A · normal week',    vols:{faq:5,fmt:4,mail:3,complaint:2,contract:2,reg:1}},
+    B:{tag:'MIX B · contract-heavy quarter', vols:{faq:2,fmt:2,mail:2,complaint:3,contract:6,reg:2}}
+  };
+
+  const rules={faq:null,fmt:null,mail:null,complaint:null,contract:null,reg:null};
+  let mix='A', running=false, runToken=0, hasRun=false;
+
+  // ---- deterministic outcome for a request ----
+  function outcome(seg,routeKey,idx){
+    const r=ROUTES[routeKey], s=SEGMENTS.find(x=>x.key===seg);
+    if(s.req>=4 && routeKey!=='human') return {ok:false, why:'compliance: no human sign-off'};
+    if(r.cap>=s.req){
+      const over=(r.cap-s.req>=2)||(routeKey==='human'&&s.req<=2);
+      return {ok:true, over, why:over?'overkill — money/time burned':''};
+    }
+    if(r.cap===s.req-1) return (idx%2===0)?{ok:false, why:'quality failure — missed nuance'}:{ok:true, near:true, why:'scraped through'};
+    return {ok:false, why:'far out of depth'};
+  }
+  function buildBatch(m){
+    const list=[];
+    SEGMENTS.forEach(s=>{
+      const v=MIXES[m].vols[s.key];
+      for(let i=0;i<v;i++) list.push({seg:s.key, idx:i, label:s.name.replace(/^\S+\s/,'')+' #'+(i+1), emoji:s.name.split(' ')[0]});
+    });
+    // interleave for a livelier stream: sort by idx then segment order
+    list.sort((a,b)=> a.idx-b.idx || SEGMENTS.findIndex(s=>s.key===a.seg)-SEGMENTS.findIndex(s=>s.key===b.seg));
+    return list;
+  }
+  function evalPolicy(m,policy){
+    const batch=buildBatch(m);
+    let cost=0, okc=0, lat=0, misroutes=0;
+    batch.forEach(q=>{
+      const rk=policy(q.seg);
+      const o=outcome(q.seg,rk,q.idx);
+      cost+=ROUTES[rk].cost; lat+=ROUTES[rk].lat;
+      if(o.ok){ okc++; if(o.over) misroutes++; }
+      else { cost+=REWORK; misroutes++; }
+    });
+    return {cost, quality:okc/batch.length, lat:lat/batch.length, n:batch.length, misroutes};
+  }
+
+  // ---- build rules UI ----
+  const rulesEl=document.getElementById('rules');
+  SEGMENTS.forEach(s=>{
+    const d=document.createElement('div');
+    d.className='rule';
+    const diff='<span class="diff">'+[1,2,3,4].map(i=>'<i class="'+(i<=s.req?'on':'')+'"></i>').join('')+'</span>';
+    d.innerHTML='<div class="seg"><div class="nm">'+s.name+diff+'</div>'+
+      '<div class="sub">'+s.sub+' · volume <b id="vol-'+s.key+'">'+MIXES.A.vols[s.key]+'</b>/batch · stakes '+s.stakes+'</div></div>'+
+      '<div class="rbtns">'+Object.keys(ROUTES).map(rk=>'<button data-r="'+rk+'">'+ROUTES[rk].name+'</button>').join('')+'</div>';
+    d.querySelectorAll('.rbtns button').forEach(b=>{
+      b.addEventListener('click',()=>{
+        if(running) return;
+        rules[s.key]=b.dataset.r;
+        d.querySelectorAll('.rbtns button').forEach(x=>x.classList.remove('on'));
+        b.classList.add('on');
+        syncRun();
+      });
+    });
+    rulesEl.appendChild(d);
+  });
+
+  // lanes
+  const lanesEl=document.getElementById('lanes');
+  function buildLanes(){
+    lanesEl.innerHTML='';
+    Object.keys(ROUTES).forEach(rk=>{
+      const d=document.createElement('div');
+      d.className='lane'; d.dataset.r=rk; d.id='lane-'+rk;
+      d.innerHTML='<div class="lh"><span>'+ROUTES[rk].name+'</span><span class="cost" id="lc-'+rk+'">€0.00</span></div><div id="lb-'+rk+'"></div>';
+      lanesEl.appendChild(d);
+    });
+  }
+  buildLanes();
+
+  function syncRun(){
+    const ready=Object.values(rules).every(v=>v);
+    document.getElementById('btnRun').disabled=!ready||running;
+    document.getElementById('btnShift').disabled=running||!hasRun||mix==='B';
+    document.getElementById('runStatus').textContent=
+      running?'Stream running…':ready?(mix==='A'?'Rules set — run the batch.':'New mix loaded — same rules. Re-run and see if they hold.'):'Route all six segments to unlock the run.';
+  }
+  function addLog(cls,txt){
+    const log=document.getElementById('runlog');
+    log.style.display='block';
+    const p=document.createElement('div');
+    p.className=cls; p.textContent=txt;
+    log.appendChild(p); log.scrollTop=log.scrollHeight;
+  }
+  function fmtMoney(n){return '€'+n.toFixed(2);}
+  function fmtLat(n){return n>=60?(n/60).toFixed(1)+'h':n.toFixed(1)+'s';}
+
+  function renderTotals(t){
+    document.getElementById('totals').innerHTML= t?
+      '<div class="tot"><div class="v blue">'+fmtMoney(t.cost)+'</div><div class="l">Total cost (incl. rework)</div></div>'+
+      '<div class="tot"><div class="v '+(t.quality>=0.95?'':'bad')+'">'+Math.round(t.quality*100)+'%</div><div class="l">Quality (first-time right)</div></div>'+
+      '<div class="tot"><div class="v">'+fmtLat(t.lat)+'</div><div class="l">Avg latency</div></div>'+
+      '<div class="tot"><div class="v '+(t.misroutes?'warn':'')+'">'+t.misroutes+'</div><div class="l">Misroutes</div></div>' : '';
+  }
+
+  async function run(){
+    if(running) return;
+    running=true; syncRun();
+    const myToken=++runToken;
+    // clear lanes/log
+    buildLanes();
+    document.getElementById('runlog').innerHTML='';
+    document.getElementById('runlog').style.display='none';
+    renderTotals(null);
+    const batch=buildBatch(mix);
+    const laneCost={nano:0,mid:0,frontier:0,human:0};
+    let cost=0, okc=0, latSum=0, mis=0, done=0;
+    for(const q of batch){
+      await new Promise(r=>setTimeout(r,230));
+      if(myToken!==runToken){ return; } // reset clicked mid-run
+      const rk=rules[q.seg];
+      const o=outcome(q.seg,rk,q.idx);
+      const reqCost=ROUTES[rk].cost+(o.ok?0:REWORK);
+      cost+=reqCost; laneCost[rk]+=reqCost; latSum+=ROUTES[rk].lat; done++;
+      if(o.ok) okc++;
+      if(!o.ok||o.over) mis++;
+      const body=document.getElementById('lb-'+rk);
+      if(body){
+        const chip=document.createElement('div');
+        chip.className='req'+(o.ok?(o.over?' over':''):' fail');
+        chip.innerHTML='<span>'+q.emoji+'</span><span class="nm">'+q.label+'</span>'+
+          '<span class="c">'+fmtMoney(reqCost)+'</span><span>'+(o.ok?(o.over?'💸':'✓'):'✗')+'</span>';
+        body.appendChild(chip);
+      }
+      const lc=document.getElementById('lc-'+rk);
+      if(lc) lc.textContent=fmtMoney(laneCost[rk]);
+      if(!o.ok) addLog('er','✗ '+q.label+' → '+ROUTES[rk].name+': '+o.why+' · rework +€9.00');
+      else if(o.over) addLog('wa','💸 '+q.label+' → '+ROUTES[rk].name+': '+o.why);
+      renderTotals({cost,quality:done?okc/done:1,lat:done?latSum/done:0,misroutes:mis});
+    }
+    if(myToken!==runToken) return;
+    addLog('ok','— Batch complete: '+okc+'/'+batch.length+' first-time right · total '+fmtMoney(cost));
+    hasRun=true; running=false;
+    renderBoard({cost,quality:okc/batch.length,lat:latSum/batch.length,misroutes:mis,n:batch.length});
+    syncRun();
+  }
+
+  function renderBoard(you){
+    const allF=evalPolicy(mix,()=> 'frontier');
+    const allN=evalPolicy(mix,()=> 'nano');
+    const b=document.getElementById('board');
+    function col(title,t,youCol){
+      return '<div class="bcol'+(youCol?' you':'')+'"><div class="bh">'+title+'</div>'+
+        '<div class="row"><span>Total cost (incl. rework)</span><b class="'+(t.cost<=Math.min(allF.cost,allN.cost)?'good':(t.cost>=Math.max(allF.cost,allN.cost)?'bad':''))+'">'+fmtMoney(t.cost)+'</b></div>'+
+        '<div class="row"><span>Quality first-time-right</span><b class="'+(t.quality>=0.95?'good':t.quality<0.75?'bad':'')+'">'+Math.round(t.quality*100)+'%</b></div>'+
+        '<div class="row"><span>Avg latency</span><b>'+fmtLat(t.lat)+'</b></div>'+
+        '<div class="row"><span>Misroutes</span><b>'+t.misroutes+'</b></div>'+
+        '<div class="qtrack"><div class="qfill" style="background:'+(youCol?'var(--accent)':'#64748b')+'" data-w="'+Math.round(t.quality*100)+'"></div></div></div>';
+    }
+    b.innerHTML= col('🧭 Your routing',you,true)+col('🧠 Baseline: all-frontier',allF,false)+col('🐜 Baseline: all-nano',allN,false);
+    Array.prototype.forEach.call(b.querySelectorAll('.qfill'),f=>{
+      setTimeout(()=>{ f.style.width=f.dataset.w+'%'; },60);
+    });
+  }
+
+  document.getElementById('btnRun').addEventListener('click',run);
+  document.getElementById('btnShift').addEventListener('click',()=>{
+    if(running||mix==='B') return;
+    mix='B';
+    document.getElementById('mixTag').textContent=MIXES.B.tag+' · '+buildBatch('B').length+' requests';
+    SEGMENTS.forEach(s=>{
+      const v=document.getElementById('vol-'+s.key);
+      if(v) v.textContent=MIXES.B.vols[s.key];
+    });
+    addLog('wa','🔀 Instructor shifted the mix: contracts ×3, regulated ×2. Same rules — do they still make sense?');
+    syncRun();
+  });
+  document.getElementById('btnReveal').addEventListener('click',()=>{
+    document.getElementById('revealPanel').classList.toggle('show');
+  });
+  document.getElementById('btnReset').addEventListener('click',()=>{
+    runToken++; running=false; hasRun=false; mix='A';
+    Object.keys(rules).forEach(k=>rules[k]=null);
+    rulesEl.querySelectorAll('.rbtns button').forEach(x=>x.classList.remove('on'));
+    SEGMENTS.forEach(s=>{
+      const v=document.getElementById('vol-'+s.key);
+      if(v) v.textContent=MIXES.A.vols[s.key];
+    });
+    document.getElementById('mixTag').textContent=MIXES.A.tag+' · '+buildBatch('A').length+' requests';
+    buildLanes();
+    renderTotals(null);
+    document.getElementById('board').innerHTML='';
+    const log=document.getElementById('runlog'); log.innerHTML=''; log.style.display='none';
+    document.getElementById('revealPanel').classList.remove('show');
+    document.getElementById('debrief').classList.remove('show');
+    syncRun();
+  });
+  document.getElementById('btnDebrief').addEventListener('click',()=>{
+    document.getElementById('debrief').classList.toggle('show');
+  });
+
+  document.getElementById('mixTag').textContent=MIXES.A.tag+' · '+buildBatch('A').length+' requests';
+  syncRun();
+})();
+</script>
+<!-- TN:INJECT:START (teaching-note overlay, additive; delete from START to END to remove) -->
+
+<style id="tn-style">
+#tn-fab{position:fixed;top:12px;right:14px;z-index:2147483000;display:inline-flex;align-items:center;gap:7px;
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:12.5px;font-weight:700;letter-spacing:.01em;
+  color:#fbbf24;background:rgba(16,20,30,.88);border:1px solid rgba(251,191,36,.5);border-radius:99px;
+  padding:7px 13px 7px 8px;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  box-shadow:0 6px 22px -10px rgba(0,0,0,.6);transition:filter .15s,transform .15s}
+#tn-fab:hover{filter:brightness(1.12);transform:translateY(-1px)}
+#tn-fab .tn-qmark{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;
+  background:#fbbf24;color:#3b2b00;font-weight:800;font-size:13px;line-height:1}
+#tn-fab .tn-lbl{white-space:nowrap}
+@media(max-width:560px){#tn-fab .tn-lbl{display:none}#tn-fab{padding:7px 8px}}
+#tn-overlay{position:fixed;inset:0;z-index:2147483001;display:none;align-items:flex-start;justify-content:center;
+  padding:40px 16px;overflow-y:auto;background:rgba(6,9,15,.74);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
+#tn-overlay.tn-open{display:flex}
+.tn-modal{position:relative;width:100%;max-width:760px;margin:auto;background:#111725;color:#e6ebf4;
+  border:1px solid rgba(251,191,36,.32);border-radius:16px;overflow:hidden;
+  box-shadow:0 40px 100px -24px rgba(0,0,0,.75);font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;line-height:1.55}
+.tn-head{padding:22px 26px 18px;border-bottom:1px solid rgba(148,163,184,.14);
+  background:linear-gradient(180deg,rgba(251,191,36,.07),transparent)}
+.tn-eyebrow{font-size:10.5px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:#fbbf24}
+.tn-title{font-size:22px;font-weight:800;letter-spacing:-.01em;margin:7px 0 0;color:#fff;padding-right:38px}
+.tn-title .tn-n{font-family:'JetBrains Mono',ui-monospace,monospace;color:#fbbf24;margin-right:8px}
+.tn-meta{display:flex;flex-wrap:wrap;gap:7px;margin-top:13px}
+.tn-chip{font-size:11px;font-weight:600;color:#cbd5e1;background:#1a2234;border:1px solid rgba(148,163,184,.16);
+  padding:4px 10px;border-radius:99px}
+.tn-chip b{color:#fff}
+.tn-chip.tn-amber{color:#fcd34d;border-color:rgba(251,191,36,.4);background:rgba(251,191,36,.08)}
+.tn-x{position:absolute;top:16px;right:16px;width:30px;height:30px;border-radius:8px;border:1px solid rgba(148,163,184,.2);
+  background:#1a2234;color:#94a3b8;font-size:17px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.tn-x:hover{color:#fff;border-color:#94a3b8}
+.tn-body{padding:20px 26px 26px;max-height:calc(85vh - 120px);overflow-y:auto}
+.tn-sec{margin-top:22px}
+.tn-sec:first-child{margin-top:6px}
+.tn-h{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#fbbf24;margin:0 0 10px;
+  display:flex;align-items:center;gap:8px}
+.tn-h::after{content:'';flex:1;height:1px;background:rgba(148,163,184,.14)}
+.tn-p{font-size:14px;color:#dbe3f0;margin:0}
+.tn-purpose{font-size:14.5px;color:#eaf0f9;margin:0;line-height:1.6}
+.tn-concept{margin:0 0 12px;padding:12px 14px;background:#0e1420;border:1px solid rgba(148,163,184,.12);border-radius:11px}
+.tn-concept:last-child{margin-bottom:0}
+.tn-concept .tn-c-name{font-size:13.5px;font-weight:700;color:#fff;margin:0 0 4px}
+.tn-concept .tn-c-how{font-size:13px;color:#aeb9cc;margin:0}
+.tn-concept .tn-c-how b{color:#cbd5e1;font-weight:600}
+.tn-list{list-style:none;margin:0;padding:0}
+.tn-list li{position:relative;padding:0 0 0 18px;margin:0 0 9px;font-size:13.5px;color:#cdd6e4}
+.tn-list li:last-child{margin-bottom:0}
+.tn-list li::before{content:'';position:absolute;left:2px;top:8px;width:6px;height:6px;border-radius:50%;background:#fb7185}
+.tn-steps{list-style:none;margin:0;padding:0;border-left:2px solid rgba(251,191,36,.28);margin-left:4px}
+.tn-steps li{position:relative;padding:0 0 0 16px;margin:0 0 11px;font-size:13.5px;color:#d3dbe9}
+.tn-steps li:last-child{margin-bottom:0}
+.tn-steps li::before{content:'';position:absolute;left:-5px;top:6px;width:8px;height:8px;border-radius:50%;
+  background:#fbbf24;box-shadow:0 0 0 3px #111725}
+.tn-mastery{padding:14px 16px;background:rgba(52,211,153,.07);border:1px solid rgba(52,211,153,.28);border-radius:11px;
+  font-size:13.5px;color:#dbe7e1;margin:0}
+.tn-mastery .tn-take{display:block;margin-top:8px;color:#6ee7b7;font-weight:600}
+.tn-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.tn-link{font-size:12px;font-weight:600;text-decoration:none;color:#cbd5e1;background:#1a2234;
+  border:1px solid rgba(148,163,184,.18);padding:6px 11px;border-radius:9px;transition:.15s}
+.tn-link:hover{color:#fff;border-color:#94a3b8}
+.tn-link.tn-fw{color:#fcd34d;border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.08)}
+.tn-link .tn-ar{opacity:.6;margin-left:4px}
+.tn-foot{margin-top:22px;padding-top:14px;border-top:1px solid rgba(148,163,184,.12);
+  font-size:11.5px;color:#5b6478;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center}
+.tn-foot a{color:#94a3b8;text-decoration:none;font-weight:600}
+.tn-foot a:hover{color:#fbbf24}
+</style>
+
+<button id="tn-fab" aria-label="Open teaching note" title="Teaching note for the instructor"><span class="tn-qmark">?</span><span class="tn-lbl">Teaching note</span></button>
+<div id="tn-overlay" role="dialog" aria-modal="true" aria-label="Teaching note"><div class="tn-modal"><button class="tn-x" aria-label="Close">✕</button><div class="tn-head"><div class="tn-eyebrow">Teaching note · for the instructor</div><h2 class="tn-title"><span class="tn-n">60</span>Model-Routing Economics Desk</h2><div class="tn-meta"><span class="tn-chip">⏱ <b>10–15 min live · ~20 min with debrief</b></span><span class="tn-chip">Economics, ROI &amp; measurement</span><span class="tn-chip tn-amber">Framework · <b>AI Tool Selection Quartet</b></span></div></div><div class="tn-body"><div class="tn-sec"><div class="tn-h">Purpose</div><p class="tn-purpose">Sending every request to one model — usually the strongest — is the most expensive habit in AI operations. Students inspect six task segments and four model profiles, write routing rules that send easy work to efficient models and hard or high-value work to stronger models or people, then run a batch and read cost, latency, quality, and misrouting. Halfway through, the instructor changes the task mix to test whether static rules survive contact with a shifting workload. The aha is that a deliberate model portfolio beats one-model-for-everything, and the cost of misrouting a hard task cheaply can dwarf the savings.</p></div><div class="tn-sec"><div class="tn-h">Concepts to explain &amp; how</div><div class="tn-concept"><p class="tn-c-name">Segment tasks before choosing a model</p><p class="tn-c-how"><b>How:</b> Walk the six segments and ask what signal predicts difficulty — length, ambiguity, stakes. Routing starts with reading the task, not with picking a favorite model.</p></div><div class="tn-concept"><p class="tn-c-name">Match each segment to a model on cost, quality, and latency</p><p class="tn-c-how"><b>How:</b> Have students write rules against the four model profiles and run the batch. Read the dashboard aloud: cheap-and-fast for easy volume, strong-and-slow for the hard tail, a person for the highest stakes.</p></div><div class="tn-concept"><p class="tn-c-name">Misrouting has an asymmetric cost</p><p class="tn-c-how"><b>How:</b> Point at a hard task sent to the cheap model: the failure, rework, and downstream damage cost far more than the tokens saved. A false cheap-route decision is not symmetric with a false expensive one.</p></div></div><div class="tn-sec"><div class="tn-h">Common misconceptions &amp; where students get stuck</div><ul class="tn-list"><li>&quot;Use the best model for everything to be safe.&quot; The batch results show the strong-model-for-all rule bleeds cost and latency on easy volume a cheap model handled fine.</li><li>&quot;Route everything cheap to save money.&quot; The misrouting column shows a hard task on a weak model produces expensive failures; the cheap route has a hidden bill.</li><li>&quot;A good routing rule is set once.&quot; The mid-game task-mix change breaks static rules; students see routing must track the workload, and learn when a person belongs in the route.</li></ul></div><div class="tn-sec"><div class="tn-h">Facilitation &amp; timing</div><ul class="tn-steps"><li>0:00 — Present the six task segments and four model profiles. Ask which signal best predicts task difficulty.</li><li>2:00 — Students write routing rules and run a workload batch. Review the cost, latency, quality, and misrouting dashboard.</li><li>6:00 — Change the task mix and re-run. Ask whether the static rules still hold; let the misroutes appear.</li><li>10:00 — Open Debrief prompts: which signal best predicted difficulty, the cost of a false cheap-route decision, when a person should enter the route.</li><li>13:00 — Compare team scores; Reset the workload for the next cohort.</li></ul></div><div class="tn-sec"><div class="tn-h">What mastery looks like</div><p class="tn-mastery">A student who gets it can design a routing policy that segments tasks by a difficulty signal and assigns each segment a model or a person on cost, quality, and latency — and can explain why misrouting a hard task cheaply is the costly error. <span class="tn-take">Takeaway: run a model portfolio, not one model for every request, and price the asymmetric cost of routing hard work to a cheap model.</span></p></div><div class="tn-sec"><div class="tn-h">Source framework &amp; related exercises</div><div class="tn-links"><a class="tn-link tn-fw" href="../frameworks/03_ai_tool_selection_quartet/03_ai_tool_selection_quartet.docx">📄 Source framework: AI Tool Selection Quartet<span class="tn-ar">↗</span></a><a class="tn-link" href="28_capability_cost_speed_privacy_selector.html">#28 Capability–Cost–Speed–Privacy Selector</a><a class="tn-link" href="54_cost_per_outcome_model_showdown.html">#54 Cost-per-Outcome Model Showdown</a><a class="tn-link" href="61_retry_economics_simulator.html">#61 Retry Economics Simulator</a></div></div><div class="tn-foot"><a href="teaching_notes.html#60_model_routing_economics_desk">Open full teaching guide ↗</a><span>Shaping Futures · IE Edge Lab</span></div></div></div></div>
+
+<script id="tn-script">
+(function(){
+  var ov=document.getElementById('tn-overlay'), fab=document.getElementById('tn-fab');
+  if(!ov||!fab) return;
+  function open(){ov.classList.add('tn-open');document.body.style.overflow='hidden';}
+  function close(){ov.classList.remove('tn-open');document.body.style.overflow='';}
+  fab.addEventListener('click',open);
+  ov.addEventListener('click',function(e){if(e.target===ov)close();});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&ov.classList.contains('tn-open'))close();});
+  var x=ov.querySelector('.tn-x'); if(x)x.addEventListener('click',close);
+})();
+</script>
+
+<!-- TN:INJECT:END -->
+</body>
+</html>
