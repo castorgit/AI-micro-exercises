@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>35 · Autonomy–Governability Dial — IE Edge Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0e16; --surface:#121826; --surface2:#1a2234; --border:rgba(148,163,184,.14);
+    --text:#e6ebf4; --muted:#94a3b8; --accent:#a3e635; --accent-soft:rgba(163,230,53,.12);
+    --amber:#fbbf24; --rose:#fb7185; --green:#34d399; --cyan:#38bdf8;
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+    background:
+      radial-gradient(1100px 700px at 85% -10%, rgba(163,230,53,.08), transparent 60%),
+      radial-gradient(900px 600px at -10% 110%, rgba(56,189,248,.05), transparent 60%),
+      var(--bg);
+    color:var(--text); min-height:100vh; padding-bottom:130px;
+  }
+  .wrap{max-width:1060px;margin:0 auto;padding:32px 24px}
+  .topnav{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px}
+  .topnav a{color:var(--muted);text-decoration:none;font-size:13px;font-weight:600}
+  .topnav a:hover{color:var(--accent)}
+  .eyebrow{font-size:11px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--accent)}
+  header h1{font-size:clamp(26px,4.2vw,40px);font-weight:800;letter-spacing:-.02em;margin:6px 0 8px}
+  header h1 .num{color:var(--accent);font-family:var(--mono)}
+  .tagline{color:var(--muted);font-size:15px;max-width:680px;line-height:1.55}
+  .meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+  .chip{font-size:11.5px;font-weight:600;color:var(--muted);background:var(--surface);border:1px solid var(--border);padding:5px 11px;border-radius:99px}
+  .chip b{color:var(--text)}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-top:22px}
+  .card h2{font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+  .hint{font-size:12.5px;color:var(--muted)}
+  .abtn{font-family:'Inter';font-size:13.5px;font-weight:700;border:none;border-radius:10px;padding:11px 18px;cursor:pointer;transition:.15s}
+  .abtn.primary{background:var(--accent);color:#1e2a05}
+  .abtn.primary:hover{filter:brightness(1.08)}
+  .abtn.primary:disabled{opacity:.4;cursor:default}
+  .abtn.ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
+  .abtn.ghost:hover{color:var(--text)}
+  .mission{background:#0d1320;border:1px solid var(--border);border-radius:12px;padding:14px 16px;font-size:13.5px;line-height:1.6}
+  .mission b{color:var(--accent)}
+  /* master dial */
+  .dialrow{display:flex;align-items:center;gap:16px;margin-top:18px;flex-wrap:wrap}
+  .dialrow input[type=range]{flex:1;min-width:220px;-webkit-appearance:none;appearance:none;height:10px;border-radius:99px;
+    background:linear-gradient(90deg,#38bdf8,#a3e635,#fb7185);outline:none;cursor:pointer}
+  .dialrow input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;
+    background:#fff;border:4px solid #0a0e16;cursor:grab}
+  .diallab{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--accent);min-width:210px}
+  .dialends{display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted);margin-top:6px}
+  .leveldesc{margin-top:10px;font-size:12.5px;color:var(--muted);line-height:1.55;min-height:20px}
+  .leveldesc b{color:var(--text)}
+  /* meters */
+  .meters{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-top:16px}
+  .meter{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:13px 15px}
+  .meter .mlab{display:flex;justify-content:space-between;font-size:10.5px;font-weight:700;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+  .meter .mlab b{font-family:var(--mono);color:var(--text)}
+  .mtrack{height:9px;background:#0d1320;border-radius:99px;overflow:hidden}
+  .mfill{height:100%;width:0%;border-radius:99px;transition:width .45s cubic-bezier(.22,1,.36,1)}
+  .meter small{display:block;font-size:10.5px;color:var(--muted);margin-top:6px;line-height:1.4}
+  /* week sim */
+  .week{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:8px}
+  @media(max-width:640px){.week{grid-template-columns:repeat(2,1fr)}}
+  .day{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:11px 12px;opacity:.35;transition:.3s;min-height:118px}
+  .day.on{opacity:1;border-color:rgba(163,230,53,.4)}
+  .day h4{font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+  .day .dn{font-family:var(--mono);font-size:12px;line-height:1.8}
+  .day .dn b{color:var(--text)}
+  .evbadge{display:inline-block;font-size:10px;font-weight:700;padding:3px 8px;border-radius:7px;margin-top:6px;line-height:1.35}
+  .evbadge.bad{background:rgba(251,113,133,.15);color:var(--rose)}
+  .evbadge.warn{background:rgba(251,191,36,.15);color:var(--amber)}
+  .evbadge.good{background:rgba(52,211,153,.13);color:var(--green)}
+  .fatiguewrap{display:flex;align-items:center;gap:12px;margin-top:14px}
+  .fatiguewrap .flab{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+  .ftrack{flex:1;height:13px;background:#0d1320;border:1px solid var(--border);border-radius:99px;overflow:hidden}
+  .ffill{height:100%;width:0%;border-radius:99px;background:linear-gradient(90deg,#34d399,#fbbf24,#fb7185);transition:width .5s}
+  .fstate{font-family:var(--mono);font-size:11.5px;font-weight:700;min-width:130px}
+  .simlog{display:none;background:#0d1320;border:1px solid var(--border);border-radius:12px;padding:13px;margin-top:12px;
+    font-family:var(--mono);font-size:11.5px;line-height:1.7;max-height:170px;overflow-y:auto;color:var(--muted)}
+  .simlog .ok{color:#6ee7b7}.simlog .warn{color:var(--amber)}.simlog .err{color:var(--rose)}
+  /* per-action */
+  .acts{display:grid;gap:10px;margin-top:4px}
+  .actrow{display:grid;grid-template-columns:180px 1fr 190px;gap:14px;align-items:center;background:var(--surface2);
+    border:1px solid var(--border);border-radius:12px;padding:11px 14px}
+  @media(max-width:720px){.actrow{grid-template-columns:1fr;gap:8px}}
+  .actrow .aname{font-size:13px;font-weight:700}
+  .actrow .aname small{display:block;font-size:10.5px;color:var(--muted);font-weight:600;margin-top:2px}
+  .actrow input[type=range]{width:100%;-webkit-appearance:none;appearance:none;height:7px;border-radius:99px;
+    background:linear-gradient(90deg,#38bdf8,#a3e635,#fb7185);outline:none;cursor:pointer}
+  .actrow input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:19px;height:19px;border-radius:50%;
+    background:#fff;border:3px solid #0a0e16;cursor:grab}
+  .actrow .alvl{font-family:var(--mono);font-size:11.5px;color:var(--accent);font-weight:700}
+  /* results table */
+  table.runs{width:100%;border-collapse:separate;border-spacing:0 6px}
+  table.runs th{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
+    text-align:left;padding:4px 10px}
+  table.runs td{background:var(--surface2);padding:10px;font-size:12px;vertical-align:middle}
+  table.runs tr td:first-child{border-radius:10px 0 0 10px;font-weight:700;font-family:var(--mono);font-size:11.5px}
+  table.runs tr td:last-child{border-radius:0 10px 10px 0}
+  table.runs tr.best td{border-top:1px solid rgba(163,230,53,.5);border-bottom:1px solid rgba(163,230,53,.5)}
+  table.runs tr.best td:first-child{border-left:1px solid rgba(163,230,53,.5)}
+  table.runs tr.best td:last-child{border-right:1px solid rgba(163,230,53,.5)}
+  td .scorebig{font-family:var(--mono);font-weight:800;font-size:16px}
+  .reveal-panel{display:none;margin-top:16px;background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.3);
+    border-radius:12px;padding:18px;font-size:13px;line-height:1.65;color:var(--text)}
+  .reveal-panel.show{display:block}
+  .reveal-panel b{color:var(--amber)}
+  .reveal-panel ul{margin:8px 0 0 18px}
+  /* instructor */
+  .instructor{position:fixed;left:0;right:0;bottom:0;background:rgba(16,20,30,.92);backdrop-filter:blur(12px);
+    border-top:1px solid rgba(251,191,36,.35);z-index:10}
+  .instructor .inner{max-width:1060px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .instructor .tag{font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--amber);
+    border:1px solid rgba(251,191,36,.4);padding:4px 9px;border-radius:6px}
+  .ibtn{font-family:'Inter';font-size:12.5px;font-weight:700;border:none;border-radius:9px;padding:9px 15px;cursor:pointer}
+  .ibtn.primary{background:var(--amber);color:#3b2b00}
+  .ibtn.ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
+  .ibtn.ghost:hover{color:var(--text)}
+  .debrief{display:none;max-width:1060px;margin:0 auto;padding:0 24px 14px;color:var(--muted);font-size:13px;line-height:1.6}
+  .debrief.show{display:block}
+  .debrief b{color:var(--amber)}
+  .footer-note{margin-top:26px;font-size:12px;color:#5b6478;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="topnav">
+    <a href="index.html">← Exercise Library</a>
+    <a href="index.html" style="font-family:var(--mono)">IE EDGE LAB · AI-NATIVE WORK</a>
+  </nav>
+
+  <header>
+    <div class="eyebrow">Workflows, agents & production systems</div>
+    <h1><span class="num">35</span> Autonomy–Governability Dial</h1>
+    <p class="tagline">One dial for an accounts-payable agent: from "ask approval for everything" to "fully autonomous". Run a simulated week at your setting, watch the manager drown — or the bad invoice slip through — then discover why one dial was the wrong shape all along.</p>
+    <div class="meta">
+      <span class="chip">Format · <b>Mini simulation</b></span>
+      <span class="chip">Band · <b>Live exercise</b></span>
+      <span class="chip">Duration · <b>8–12 min</b></span>
+      <span class="chip">Concepts · <b>autonomy–governability balance · degrees of freedom · monitoring</b></span>
+    </div>
+  </header>
+
+  <div class="card">
+    <h2>1 · The master dial</h2>
+    <div class="mission">🧾 The agent runs <b>accounts payable</b>: it reads incoming invoices, flags anomalies, posts entries to the ledger, and pays vendors. ~220 invoices arrive per week. Somewhere in Wednesday's pile: a <b>duplicate invoice for €18,400</b>.</div>
+    <div class="dialrow">
+      <input type="range" id="masterDial" min="1" max="5" step="1" value="3">
+      <span class="diallab" id="dialLab"></span>
+    </div>
+    <div class="dialends"><span>← Level 1 · ask approval for everything</span><span>Level 5 · fully autonomous →</span></div>
+    <div class="leveldesc" id="levelDesc"></div>
+    <div class="meters">
+      <div class="meter"><div class="mlab"><span>Interventions / day</span><b id="mInt">–</b></div>
+        <div class="mtrack"><div class="mfill" id="fInt" style="background:linear-gradient(90deg,#fbbf24,#fb7185)"></div></div>
+        <small>Approvals the manager must click. Above ~50/day, attention collapses.</small></div>
+      <div class="meter"><div class="mlab"><span>Throughput / week</span><b id="mThr">–</b></div>
+        <div class="mtrack"><div class="mfill" id="fThr" style="background:linear-gradient(90deg,#a3e635,#d9f99d)"></div></div>
+        <small>Invoices fully processed. Every approval wait slows the pipeline.</small></div>
+      <div class="meter"><div class="mlab"><span>Incident exposure</span><b id="mExp">–</b></div>
+        <div class="mtrack"><div class="mfill" id="fExp" style="background:linear-gradient(90deg,#38bdf8,#fb7185)"></div></div>
+        <small>Chance that something bad ships without a human seeing it.</small></div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:16px">
+      <button class="abtn primary" id="btnRunGlobal">▶ Run a simulated week at this level</button>
+      <span class="hint" id="globalStatus"></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>2 · The simulated week</h2>
+    <div class="week" id="week"></div>
+    <div class="fatiguewrap">
+      <span class="flab">Manager fatigue</span>
+      <div class="ftrack"><div class="ffill" id="fatFill"></div></div>
+      <span class="fstate" id="fatState">–</span>
+    </div>
+    <div class="simlog" id="simLog"></div>
+  </div>
+
+  <div class="card">
+    <h2>3 · Sweet-spot discovery — one dial per action type</h2>
+    <p class="hint" style="margin-bottom:12px">Same agent, but now each action class gets its own autonomy level. Consequences differ — why should the dial be shared?</p>
+    <div class="acts" id="acts"></div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px">
+      <button class="abtn primary" id="btnRunMix">▶ Run a week with this per-action mix</button>
+      <span class="hint" id="mixStatus"></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>4 · Runs &amp; scores</h2>
+    <div style="overflow-x:auto">
+      <table class="runs">
+        <thead><tr><th>Configuration</th><th>Throughput</th><th>Interv./day</th><th>Incidents</th><th>Fatigue</th><th>Score</th></tr></thead>
+        <tbody id="runsBody"></tbody>
+      </table>
+    </div>
+    <p class="hint" id="runsHint">No runs yet — run a week above.</p>
+    <div class="reveal-panel" id="revealPanel">
+      <b>Instructor reveal — autonomy is not one dial:</b>
+      <ul>
+        <li><b>It's a dial per consequence class.</b> Reading an invoice is reversible and cheap — full autonomy costs nothing. Paying €18,400 is irreversible — that dial belongs low, forever.</li>
+        <li><b>Low ≠ safe.</b> "Approve everything" produced 200+ clicks a day, and by Wednesday the manager was rubber-stamping — including the duplicate. Drowning oversight is fake oversight.</li>
+        <li><b>High ≠ mature.</b> Full autonomy looked impressive until the bad invoice got paid at machine speed. Maturity is a per-action mix that beats every single global setting — governable autonomy, not maximal autonomy.</li>
+      </ul>
+      Try beating <b>Read 5 · Flag 4 · Post 3 · Pay 2</b> with any global level. You can't — the dial shapes don't match the consequences.
+    </div>
+  </div>
+
+  <p class="footer-note">Proof of concept · seeded simulation, client-side · IE Edge Lab teaching companion</p>
+</div>
+
+<div class="instructor">
+  <div class="inner">
+    <span class="tag">Instructor</span>
+    <button class="ibtn primary" id="btnReveal">🎛️ Reveal: dial per consequence class</button>
+    <button class="ibtn ghost" id="btnReset">↺ Reset</button>
+    <button class="ibtn ghost" id="btnDebrief">💬 Debrief prompts</button>
+    <span style="flex:1"></span>
+    <span style="font-size:11.5px;color:var(--muted)">Run L1 and L5 first — let both fail differently — then open the per-action dials</span>
+  </div>
+  <div class="debrief" id="debrief">
+    <b>Debrief:</b> Which freedom created the most value? · Which monitoring control was merely observational? · What should remain impossible?
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+/* weekly request volume per action class, and intervention factor per level */
+const ACTIONS=[
+  {key:'read', name:'📖 Read invoices', cls:'reversible · zero blast radius', req:500},
+  {key:'flag', name:'🚩 Flag anomalies', cls:'advisory · a human still looks', req:220},
+  {key:'post', name:'🧾 Post ledger entries', cls:'correctable · audit pain', req:260},
+  {key:'pay',  name:'💸 Pay vendors', cls:'irreversible · money leaves', req:70}
+];
+const INTF=[1,.5,.2,.05,0];
+const LVL_TXT=['1 · approve each action','2 · approve in batches','3 · approve above threshold','4 · notify only','5 · silent autopilot'];
+const MASTER_TXT=[
+  '<b>Level 1 — permission for everything.</b> The agent may not even open an invoice without a click. Total control, in theory.',
+  '<b>Level 2 — batch approvals.</b> The agent queues work; the manager approves in bulk. Bulk is where attention goes to die.',
+  '<b>Level 3 — approval above thresholds.</b> Routine flows free; big or odd items wait for a human.',
+  '<b>Level 4 — notify only.</b> The agent acts, the manager gets a feed. Reading the feed is optional. That\'s the problem.',
+  '<b>Level 5 — fully autonomous.</b> Invoices in, payments out. Beautiful throughput. Nobody is watching.'
+];
+const DAYS=['Mon','Tue','Wed','Thu','Fri'];
+
+const mix={read:3,flag:3,post:3,pay:3};   /* per-action dials */
+let runToken=0;
+let running=false;
+let bestScore=-1;
+
+const $=function(id){return document.getElementById(id);};
+const sleep=function(ms){return new Promise(function(r){setTimeout(r,ms);});};
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+
+/* ---------- consequence model ---------- */
+function model(levels){
+  let interv=0;
+  ACTIONS.forEach(function(a){ interv += a.req*INTF[levels[a.key]-1]; });
+  interv=Math.round(interv);
+  const tp=Math.round(clamp(1100-1.55*interv,150,1100)*0.2); /* invoices/week (220 arriving ≈ capacity 220) */
+  const fatigue = interv>=400?'severe': interv>=180?'high': interv>=60?'moderate':'low';
+  /* seeded events */
+  const events=[];
+  let incidents=0, warns=0;
+  /* E1: Wednesday duplicate €18,400 — it is a payment */
+  const e1caught = levels.pay<=3 && fatigue!=='severe';
+  if(e1caught) events.push({day:2,cls:'good',txt:'✓ duplicate €18,400 caught at payment approval',log:'ok|Wed · payment queue: duplicate invoice #4471 (€18,400) → HELD by human approval. Crisis averted.'});
+  else {
+    incidents++;
+    if(fatigue==='severe' && levels.pay<=3)
+      events.push({day:2,cls:'bad',txt:'💥 duplicate €18,400 rubber-stamped',log:'err|Wed 14:02 · approval #612 of the week. Manager clicks approve without reading. It was the duplicate. €18,400 gone.'});
+    else
+      events.push({day:2,cls:'bad',txt:'💥 duplicate €18,400 paid automatically',log:'err|Wed 14:02 · duplicate invoice #4471 paid at machine speed. Nobody saw it until the vendor called, amused.'});
+  }
+  /* E2: Tuesday anomaly mis-flag → wrong postings if both flag & post run free */
+  if(levels.flag>=4 && levels.post>=4){
+    warns++;
+    events.push({day:1,cls:'warn',txt:'⚠ 14 entries mis-posted',log:'warn|Tue · a mis-read anomaly flag cascaded: 14 ledger entries posted wrong. Friday = cleanup day.'});
+  } else {
+    events.push({day:1,cls:'good',txt:'✓ anomaly caught & corrected',log:'ok|Tue · odd utility invoice flagged; posting review corrected it before the ledger noticed.'});
+  }
+  /* E3: fatigue */
+  if(fatigue==='severe'){
+    warns++;
+    events.push({day:2,cls:'warn',txt:'🫠 rubber-stamping detected',log:'warn|Wed · approval latency dropped to 1.4s per click. That is not review, that is cardio.'});
+  }
+  const fatPts={low:15,moderate:12,high:6,severe:0}[fatigue];
+  const score=Math.round(clamp( tp/220*55 + (incidents>0? -18*incidents : 30) + fatPts - warns*6, 0, 100));
+  return {interv:interv, intPerDay:Math.round(interv/5), tp:tp, fatigue:fatigue, events:events, incidents:incidents, warns:warns, score:score};
+}
+function globalLevels(n){ return {read:n,flag:n,post:n,pay:n}; }
+
+/* ---------- live meters ---------- */
+function updateLive(){
+  const n=+$('masterDial').value;
+  $('dialLab').textContent='Level '+n+' / 5';
+  $('levelDesc').innerHTML=MASTER_TXT[n-1];
+  const m=model(globalLevels(n));
+  $('mInt').textContent=String(m.intPerDay);
+  $('fInt').style.width=clamp(m.intPerDay/210*100,2,100)+'%';
+  $('mThr').textContent=m.tp+' inv.';
+  $('fThr').style.width=clamp(m.tp/220*100,2,100)+'%';
+  const expo=[3,6,12,38,60][n-1];
+  /* low levels: nominal exposure looks low, but severe fatigue quietly raises the real number */
+  const shownExpo=(m.fatigue==='severe')? Math.max(expo,42) : expo;
+  $('mExp').textContent=shownExpo+'%';
+  $('fExp').style.width=shownExpo+'%';
+}
+
+/* ---------- week UI ---------- */
+function buildWeek(){
+  const w=$('week'); w.innerHTML='';
+  DAYS.forEach(function(d,i){
+    const el=document.createElement('div');
+    el.className='day'; el.id='day-'+i;
+    el.innerHTML='<h4>'+d+'</h4><div class="dn">proc. <b id="dp-'+i+'">0</b><br>appr. <b id="da-'+i+'">0</b></div><div id="dev-'+i+'"></div>';
+    w.appendChild(el);
+  });
+}
+function addLog(line){
+  const log=$('simLog'); log.style.display='block';
+  const parts=line.split('|');
+  const p=document.createElement('div');
+  p.className=parts[0];
+  p.textContent=(parts[0]==='err'?'✗ ':parts[0]==='warn'?'⚠ ':'✓ ')+parts[1];
+  log.appendChild(p); log.scrollTop=log.scrollHeight;
+}
+function setFatigue(frac,fatigue){
+  $('fatFill').style.width=clamp(frac*100,0,100)+'%';
+  const col={low:'var(--green)',moderate:'var(--accent)',high:'var(--amber)',severe:'var(--rose)'}[fatigue];
+  $('fatState').textContent=fatigue.toUpperCase();
+  $('fatState').style.color=col;
+}
+
+/* ---------- run a week ---------- */
+async function runWeek(levels,label,statusEl){
+  if(running) return;
+  running=true;
+  const tok=++runToken;
+  buildWeek();
+  const log=$('simLog'); log.innerHTML=''; log.style.display='none';
+  setFatigue(0,'low');
+  statusEl.textContent='Simulating the week…';
+  const m=model(levels);
+  addLog('ok|Config: '+label+' · expected '+m.intPerDay+' approvals/day');
+  const wk=$('week');
+  if(wk.scrollIntoView) wk.scrollIntoView({behavior:'smooth',block:'nearest'});
+  const fatFracEnd={low:.2,moderate:.45,high:.72,severe:1}[m.fatigue];
+  for(let d=0;d<5;d++){
+    if(tok!==runToken){running=false;return;}
+    const day=$('day-'+d); day.classList.add('on');
+    $('dp-'+d).textContent=String(Math.round(m.tp/5*(d===4&&m.warns&&m.events.some(function(e){return e.txt.indexOf('mis-posted')>=0;})?0.6:1)));
+    $('da-'+d).textContent=String(m.intPerDay);
+    setFatigue(fatFracEnd*(d+1)/5,m.fatigue);
+    m.events.forEach(function(ev){
+      if(ev.day===d){
+        const b=document.createElement('span');
+        b.className='evbadge '+ev.cls;
+        b.textContent=ev.txt;
+        $('dev-'+d).appendChild(b);
+        addLog(ev.log);
+      }
+    });
+    if(d===1 && m.intPerDay>150) addLog('warn|Tue · the approval queue is now longer than the invoice queue.');
+    if(d===4 && m.events.some(function(ev){return ev.txt.indexOf('mis-posted')>=0;})) addLog('warn|Fri · cleanup day: reversing 14 mis-posted entries by hand.');
+    await sleep(620); if(tok!==runToken){running=false;return;}
+  }
+  addLog((m.incidents?'err':'ok')+'|Week done · '+m.tp+' invoices · '+m.incidents+' incident(s) · fatigue '+m.fatigue+' · score '+m.score);
+  /* record run */
+  const tb=$('runsBody');
+  const tr=document.createElement('tr');
+  const scoreCol=m.score>=80?'var(--accent)':m.score>=55?'var(--amber)':'var(--rose)';
+  tr.innerHTML='<td>'+esc(label)+'</td><td>'+m.tp+' / 220</td><td>'+m.intPerDay+'</td>'+
+    '<td>'+(m.incidents? '💥 '+m.incidents : '0')+(m.warns?' · ⚠ '+m.warns:'')+'</td>'+
+    '<td>'+m.fatigue+'</td><td><span class="scorebig" style="color:'+scoreCol+'">'+m.score+'</span></td>';
+  tb.appendChild(tr);
+  if(m.score>bestScore){
+    bestScore=m.score;
+    tb.querySelectorAll('tr').forEach(function(r){r.classList.remove('best');});
+    tr.classList.add('best');
+  }
+  $('runsHint').textContent = tb.children.length>1
+    ? 'Same agent, same week, same bad invoice — only the dials changed.'
+    : 'Now try a different setting (or the per-action mix) and compare.';
+  statusEl.textContent='Done — score '+m.score+'. See the table below.';
+  running=false;
+}
+
+/* ---------- per-action dials ---------- */
+function renderActs(){
+  const c=$('acts'); c.innerHTML='';
+  ACTIONS.forEach(function(a){
+    const row=document.createElement('div');
+    row.className='actrow';
+    row.innerHTML='<div class="aname">'+a.name+'<small>'+esc(a.cls)+'</small></div>'+
+      '<input type="range" min="1" max="5" step="1" value="'+mix[a.key]+'" data-k="'+a.key+'">'+
+      '<span class="alvl" id="alvl-'+a.key+'">'+LVL_TXT[mix[a.key]-1]+'</span>';
+    const rng=row.querySelector('input');
+    rng.addEventListener('input',function(){
+      mix[a.key]=+rng.value;
+      $('alvl-'+a.key).textContent=LVL_TXT[mix[a.key]-1];
+    });
+    c.appendChild(row);
+  });
+}
+
+/* ---------- wiring ---------- */
+$('masterDial').addEventListener('input',updateLive);
+$('btnRunGlobal').onclick=function(){
+  const n=+$('masterDial').value;
+  runWeek(globalLevels(n),'Global L'+n,$('globalStatus'));
+};
+$('btnRunMix').onclick=function(){
+  const label='Mix R'+mix.read+'·F'+mix.flag+'·P'+mix.post+'·€'+mix.pay;
+  runWeek({read:mix.read,flag:mix.flag,post:mix.post,pay:mix.pay},label,$('mixStatus'));
+};
+$('btnReveal').onclick=function(){ $('revealPanel').classList.toggle('show'); };
+$('btnDebrief').onclick=function(){ $('debrief').classList.toggle('show'); };
+$('btnReset').onclick=function(){
+  runToken++; running=false; bestScore=-1;
+  $('masterDial').value='3';
+  mix.read=3; mix.flag=3; mix.post=3; mix.pay=3;
+  renderActs(); updateLive(); buildWeek();
+  const log=$('simLog'); log.innerHTML=''; log.style.display='none';
+  setFatigue(0,'low'); $('fatState').textContent='–'; $('fatState').style.color='';
+  $('runsBody').innerHTML='';
+  $('runsHint').textContent='No runs yet — run a week above.';
+  $('globalStatus').textContent=''; $('mixStatus').textContent='';
+  $('revealPanel').classList.remove('show');
+  $('debrief').classList.remove('show');
+};
+
+buildWeek(); renderActs(); updateLive();
+$('fatState').textContent='–';
+})();
+</script>
+<!-- TN:INJECT:START (teaching-note overlay, additive; delete from START to END to remove) -->
+
+<style id="tn-style">
+#tn-fab{position:fixed;top:12px;right:14px;z-index:2147483000;display:inline-flex;align-items:center;gap:7px;
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:12.5px;font-weight:700;letter-spacing:.01em;
+  color:#fbbf24;background:rgba(16,20,30,.88);border:1px solid rgba(251,191,36,.5);border-radius:99px;
+  padding:7px 13px 7px 8px;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  box-shadow:0 6px 22px -10px rgba(0,0,0,.6);transition:filter .15s,transform .15s}
+#tn-fab:hover{filter:brightness(1.12);transform:translateY(-1px)}
+#tn-fab .tn-qmark{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;
+  background:#fbbf24;color:#3b2b00;font-weight:800;font-size:13px;line-height:1}
+#tn-fab .tn-lbl{white-space:nowrap}
+@media(max-width:560px){#tn-fab .tn-lbl{display:none}#tn-fab{padding:7px 8px}}
+#tn-overlay{position:fixed;inset:0;z-index:2147483001;display:none;align-items:flex-start;justify-content:center;
+  padding:40px 16px;overflow-y:auto;background:rgba(6,9,15,.74);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
+#tn-overlay.tn-open{display:flex}
+.tn-modal{position:relative;width:100%;max-width:760px;margin:auto;background:#111725;color:#e6ebf4;
+  border:1px solid rgba(251,191,36,.32);border-radius:16px;overflow:hidden;
+  box-shadow:0 40px 100px -24px rgba(0,0,0,.75);font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;line-height:1.55}
+.tn-head{padding:22px 26px 18px;border-bottom:1px solid rgba(148,163,184,.14);
+  background:linear-gradient(180deg,rgba(251,191,36,.07),transparent)}
+.tn-eyebrow{font-size:10.5px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:#fbbf24}
+.tn-title{font-size:22px;font-weight:800;letter-spacing:-.01em;margin:7px 0 0;color:#fff;padding-right:38px}
+.tn-title .tn-n{font-family:'JetBrains Mono',ui-monospace,monospace;color:#fbbf24;margin-right:8px}
+.tn-meta{display:flex;flex-wrap:wrap;gap:7px;margin-top:13px}
+.tn-chip{font-size:11px;font-weight:600;color:#cbd5e1;background:#1a2234;border:1px solid rgba(148,163,184,.16);
+  padding:4px 10px;border-radius:99px}
+.tn-chip b{color:#fff}
+.tn-chip.tn-amber{color:#fcd34d;border-color:rgba(251,191,36,.4);background:rgba(251,191,36,.08)}
+.tn-x{position:absolute;top:16px;right:16px;width:30px;height:30px;border-radius:8px;border:1px solid rgba(148,163,184,.2);
+  background:#1a2234;color:#94a3b8;font-size:17px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.tn-x:hover{color:#fff;border-color:#94a3b8}
+.tn-body{padding:20px 26px 26px;max-height:calc(85vh - 120px);overflow-y:auto}
+.tn-sec{margin-top:22px}
+.tn-sec:first-child{margin-top:6px}
+.tn-h{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#fbbf24;margin:0 0 10px;
+  display:flex;align-items:center;gap:8px}
+.tn-h::after{content:'';flex:1;height:1px;background:rgba(148,163,184,.14)}
+.tn-p{font-size:14px;color:#dbe3f0;margin:0}
+.tn-purpose{font-size:14.5px;color:#eaf0f9;margin:0;line-height:1.6}
+.tn-concept{margin:0 0 12px;padding:12px 14px;background:#0e1420;border:1px solid rgba(148,163,184,.12);border-radius:11px}
+.tn-concept:last-child{margin-bottom:0}
+.tn-concept .tn-c-name{font-size:13.5px;font-weight:700;color:#fff;margin:0 0 4px}
+.tn-concept .tn-c-how{font-size:13px;color:#aeb9cc;margin:0}
+.tn-concept .tn-c-how b{color:#cbd5e1;font-weight:600}
+.tn-list{list-style:none;margin:0;padding:0}
+.tn-list li{position:relative;padding:0 0 0 18px;margin:0 0 9px;font-size:13.5px;color:#cdd6e4}
+.tn-list li:last-child{margin-bottom:0}
+.tn-list li::before{content:'';position:absolute;left:2px;top:8px;width:6px;height:6px;border-radius:50%;background:#fb7185}
+.tn-steps{list-style:none;margin:0;padding:0;border-left:2px solid rgba(251,191,36,.28);margin-left:4px}
+.tn-steps li{position:relative;padding:0 0 0 16px;margin:0 0 11px;font-size:13.5px;color:#d3dbe9}
+.tn-steps li:last-child{margin-bottom:0}
+.tn-steps li::before{content:'';position:absolute;left:-5px;top:6px;width:8px;height:8px;border-radius:50%;
+  background:#fbbf24;box-shadow:0 0 0 3px #111725}
+.tn-mastery{padding:14px 16px;background:rgba(52,211,153,.07);border:1px solid rgba(52,211,153,.28);border-radius:11px;
+  font-size:13.5px;color:#dbe7e1;margin:0}
+.tn-mastery .tn-take{display:block;margin-top:8px;color:#6ee7b7;font-weight:600}
+.tn-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.tn-link{font-size:12px;font-weight:600;text-decoration:none;color:#cbd5e1;background:#1a2234;
+  border:1px solid rgba(148,163,184,.18);padding:6px 11px;border-radius:9px;transition:.15s}
+.tn-link:hover{color:#fff;border-color:#94a3b8}
+.tn-link.tn-fw{color:#fcd34d;border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.08)}
+.tn-link .tn-ar{opacity:.6;margin-left:4px}
+.tn-foot{margin-top:22px;padding-top:14px;border-top:1px solid rgba(148,163,184,.12);
+  font-size:11.5px;color:#5b6478;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center}
+.tn-foot a{color:#94a3b8;text-decoration:none;font-weight:600}
+.tn-foot a:hover{color:#fbbf24}
+</style>
+
+<button id="tn-fab" aria-label="Open teaching note" title="Teaching note for the instructor"><span class="tn-qmark">?</span><span class="tn-lbl">Teaching note</span></button>
+<div id="tn-overlay" role="dialog" aria-modal="true" aria-label="Teaching note"><div class="tn-modal"><button class="tn-x" aria-label="Close">✕</button><div class="tn-head"><div class="tn-eyebrow">Teaching note · for the instructor</div><h2 class="tn-title"><span class="tn-n">35</span>Autonomy–Governability Dial</h2><div class="tn-meta"><span class="tn-chip">⏱ <b>8–12 min live · ~15 min with debrief</b></span><span class="tn-chip">Workflows, agents &amp; production systems</span><span class="tn-chip tn-amber">Framework · <b>Autonomy Governability Balance</b></span></div></div><div class="tn-body"><div class="tn-sec"><div class="tn-h">Purpose</div><p class="tn-purpose">&#x27;Autonomy&#x27; gets treated as one dial and as a maturity badge, and both are wrong. This simulation splits autonomy into five separate freedoms — goals, tools, spending, communication and stopping — and shows that each freedom you grant adds capability but also a governance burden you then have to carry. Students learn to justify the minimum autonomy a mission actually needs rather than maxing the dials for prestige. The business relevance is that every freedom you grant an agent is a monitoring and liability cost, so governable mission fit beats raw autonomy.</p></div><div class="tn-sec"><div class="tn-h">Concepts to explain &amp; how</div><div class="tn-concept"><p class="tn-c-name">Autonomy is a bundle of freedoms, not a single slider</p><p class="tn-c-how"><b>How:</b> Introduce the five dials separately and raise only one at a time; show the capability, variability, cost and control-requirement readouts moving independently.</p></div><div class="tn-concept"><p class="tn-c-name">Each freedom you grant carries a governance burden</p><p class="tn-c-how"><b>How:</b> Turn up the spending or tools dial and point at the control-requirement gauge rising in lockstep; you don&#x27;t get the capability without also buying the oversight.</p></div><div class="tn-concept"><p class="tn-c-name">Aim for minimum autonomy for the mission, not maximum</p><p class="tn-c-how"><b>How:</b> Run the surprise scenario, then have teams revise downward; per the choreography, reward the team that hits the goal with the fewest freedoms unlocked.</p></div></div><div class="tn-sec"><div class="tn-h">Common misconceptions &amp; where students get stuck</div><ul class="tn-list"><li>&quot;Higher autonomy is more advanced.&quot; The scoring rewards governable mission fit, not maxed dials; a fully autonomous agent on a simple mission is over-built and under-controlled.</li><li>&quot;Monitoring equals control.&quot; The debrief flags controls that are merely observational — you can watch a runaway without being able to stop it, and a dashboard is not a brake.</li><li>&quot;Some freedoms are free.&quot; Every dial you raise moves the cost and control-requirement readouts, so there is no capability gain without an oversight cost.</li></ul></div><div class="tn-sec"><div class="tn-h">Facilitation &amp; timing</div><ul class="tn-steps"><li>0:00 — Pick a mission. Ask teams to guess which single freedom will matter most before touching the dials.</li><li>2:00 — Teams set the five autonomy dials and watch capability, variability, cost and control requirements respond.</li><li>5:00 — Instructor injects the surprise scenario; let teams feel where their settings help or hurt.</li><li>8:00 — Teams revise, aiming for the minimum autonomy that still completes the mission.</li><li>10:00 — Open Debrief prompts: which freedom created value, which monitoring was merely observational, and what should stay impossible? Reset for the next mission.</li></ul></div><div class="tn-sec"><div class="tn-h">What mastery looks like</div><p class="tn-mastery">A student who gets it can decompose an agent&#x27;s autonomy into specific freedoms, name the governance burden each one adds, and defend the least-autonomy design that still accomplishes the mission. <span class="tn-take">Takeaway: autonomy is a bundle of separately granted freedoms, each with an oversight cost, so grant the minimum the mission needs and keep some things impossible by design.</span></p></div><div class="tn-sec"><div class="tn-h">Source framework &amp; related exercises</div><div class="tn-links"><a class="tn-link tn-fw" href="../frameworks/21_autonomy_governability_balance/21_autonomy_governability_balance.docx">📄 Source framework: Autonomy Governability Balance<span class="tn-ar">↗</span></a><a class="tn-link" href="48_person_in_the_lead_control_room.html">#48 Person-in-the-Lead Control Room</a><a class="tn-link" href="26_least_privilege_tool_belt.html">#26 Least-Privilege Tool Belt</a><a class="tn-link" href="34_agent_loop_command_center.html">#34 Agent Loop Command Center</a></div></div><div class="tn-foot"><a href="teaching_notes.html#35_autonomy_governability_dial">Open full teaching guide ↗</a><span>Shaping Futures · IE Edge Lab</span></div></div></div></div>
+
+<script id="tn-script">
+(function(){
+  var ov=document.getElementById('tn-overlay'), fab=document.getElementById('tn-fab');
+  if(!ov||!fab) return;
+  function open(){ov.classList.add('tn-open');document.body.style.overflow='hidden';}
+  function close(){ov.classList.remove('tn-open');document.body.style.overflow='';}
+  fab.addEventListener('click',open);
+  ov.addEventListener('click',function(e){if(e.target===ov)close();});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&ov.classList.contains('tn-open'))close();});
+  var x=ov.querySelector('.tn-x'); if(x)x.addEventListener('click',close);
+})();
+</script>
+
+<!-- TN:INJECT:END -->
+</body>
+</html>
